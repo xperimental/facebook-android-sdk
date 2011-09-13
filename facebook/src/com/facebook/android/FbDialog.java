@@ -28,6 +28,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
 import android.view.ViewGroup;
@@ -111,8 +112,33 @@ public class FbDialog extends Dialog {
         mContent.addView(mTitle);
     }
 
+  private static class IgnoreFocusChangedExceptionWebView extends WebView {
+    public IgnoreFocusChangedExceptionWebView(Context context) {
+      super(context);
+    }
+
+    public IgnoreFocusChangedExceptionWebView(Context context, AttributeSet attrs) {
+      super(context, attrs);
+    }
+
+    public IgnoreFocusChangedExceptionWebView(Context context, AttributeSet attrs, int defStyle) {
+      super(context, attrs, defStyle);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+      try {
+        super.onWindowFocusChanged(hasWindowFocus);
+      }
+      catch(NullPointerException e) {
+        // Catch and swallow exception. This gets thrown on many Droid 2.2 phones, and possibly
+        // some HTC 2.2 phones as well.
+      }
+    }
+  }
+
     private void setUpWebView() {
-        mWebView = new WebView(getContext());
+        mWebView = new IgnoreFocusChangedExceptionWebView(getContext());
         mWebView.setVerticalScrollBarEnabled(false);
         mWebView.setHorizontalScrollBarEnabled(false);
         mWebView.setWebViewClient(new FbDialog.FbWebViewClient());
